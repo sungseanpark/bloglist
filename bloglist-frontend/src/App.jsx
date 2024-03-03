@@ -83,26 +83,6 @@ const App = () => {
     setUser(null)
   }
 
-  // const addBlog = (event) => {
-  //   event.preventDefault()
-  //   const blogObject = {
-  //     title: title,
-  //     author: author,
-  //     url: url,
-  //   }
-
-  //   blogService
-  //     .create(blogObject)
-  //     .then(returnedBlog => {
-  //       setBlogs(blogs.concat(returnedBlog))
-  //       setNotificationMessage(
-  //         `A new blog '${returnedBlog.title}' by '${returnedBlog.author}' added`
-  //       )
-  //       setTimeout(() => {
-  //         setNotificationMessage(null)
-  //       }, 5000)
-  //     })
-  // }
 
   const addBlog = (blogObject) => {
     blogFormRef.current.toggleVisibility()
@@ -118,6 +98,16 @@ const App = () => {
         }, 5000)
       })
   }
+
+  const increaseLike = (id, blogObject) => {
+    blogService
+      .update(id, blogObject)
+      .then(returnedBlog => {
+        setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
+        //console.log(returnedBlog.user)
+      })
+  }
+
 
   const loginForm = () => (
     <div>
@@ -147,35 +137,6 @@ const App = () => {
     </div>
   )
 
-  // const blogForm = () => (
-  //   <div>
-  //     <h2>create new</h2>
-  //   <form onSubmit={addBlog}>
-  //     <div>
-  //       title:
-  //         <input
-  //         value={title}
-  //         onChange={({ target }) => setTitle(target.value)}
-  //       />
-  //     </div>
-  //     <div>
-  //       author:
-  //         <input
-  //         value={author}
-  //         onChange={({ target }) => setAuthor(target.value)}
-  //       />
-  //     </div>
-  //     <div>
-  //       url:
-  //         <input
-  //         value={url}
-  //         onChange={({ target }) => setUrl(target.value)}
-  //       />
-  //     </div>
-  //     <button type="submit">create</button>
-  //   </form>
-  //   </div>
-  // )
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -207,7 +168,7 @@ const App = () => {
         />
       </Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} updateBlog={increaseLike} />
       )}
     </div>
   )

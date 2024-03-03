@@ -1,9 +1,10 @@
 import { useState } from 'react'
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, updateBlog }) => {
   const [visible, setVisible] = useState(false)
   const [buttonLabel, setButtonLabel] = useState('view')
   const showWhenVisible = { display: visible ? '' : 'none' }
+  const [blogUser, setBlogUser] = useState(blog.user.name)
 
   const blogStyle = {
     paddingTop: 10,
@@ -11,6 +12,17 @@ const Blog = ({ blog }) => {
     border: 'solid',
     borderWidth: 1,
     marginBottom: 5
+  }
+
+  const increaseLike = (event) => {
+    event.preventDefault()
+    updateBlog(blog.id, {
+      user: blog.user.id,
+      likes: blog.likes + 1,
+      author: blog.author,
+      title: blog.title,
+      url: blog.url,
+    })
   }
 
   const toggleVisibility = () => {
@@ -33,10 +45,10 @@ const Blog = ({ blog }) => {
           {blog.url}
         </div>
         <div>
-          likes {blog.likes} <button>like</button>
+          likes {blog.likes} <button onClick={increaseLike}>like</button>
         </div>
         <div>
-          {blog.user.name}
+          {blogUser}
         </div>
       </div>  
     </div> 
