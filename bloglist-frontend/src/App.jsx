@@ -106,6 +106,14 @@ const App = () => {
         setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
         //console.log(returnedBlog.user)
       })
+    //console.log(user)
+  }
+
+  const removeBlog = (id) => {
+    blogService
+      .deleteBlog(id)
+      .then(setBlogs(blogs.filter((blog) => blog.id != id)))
+
   }
 
 
@@ -170,7 +178,7 @@ const App = () => {
       {blogs
         .sort((a,b) => a.likes - b.likes)
         .map(blog =>
-        <Blog key={blog.id} blog={blog} updateBlog={increaseLike} />
+        <Blog key={blog.id} blog={blog} updateBlog={increaseLike} deleteBlog={removeBlog} userUsername={user.username}/>
       )}
     </div>
   )
