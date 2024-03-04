@@ -5,7 +5,7 @@ const Blog = ({ blog, updateBlog, deleteBlog, userUsername }) => {
   const [buttonLabel, setButtonLabel] = useState('view')
   const showWhenVisible = { display: visible ? '' : 'none' }
   const [blogUser, setBlogUser] = useState(blog.user.name)
-  const blogCreatedByUser = { display: blog.user.username == userUsername ? '' : 'none' }
+  const blogCreatedByUser = { display: blog.user.username === userUsername ? '' : 'none' }
 
   const blogStyle = {
     paddingTop: 10,
@@ -60,8 +60,8 @@ const Blog = ({ blog, updateBlog, deleteBlog, userUsername }) => {
         <div style = {blogCreatedByUser}>
           <button onClick={removeBlog}>remove</button>
         </div>
-      </div>  
-    </div> 
-)}
+      </div>
+    </div>
+  )}
 
 export default Blog

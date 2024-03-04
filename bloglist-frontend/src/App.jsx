@@ -31,15 +31,15 @@ const Error = ({ message }) => {
 
 const App = () => {
 
-  
+
   const [blogs, setBlogs] = useState([])
   // const [title, setTitle] = useState('')
   // const [author, setAuthor] = useState('')
   // const [url, setUrl] = useState('')
   const [notificationMessage, setNotificationMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('') 
-  const [password, setPassword] = useState('') 
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
   useEffect(() => {
@@ -56,7 +56,7 @@ const App = () => {
   const handleLogin = async (event) => {
     event.preventDefault()
 
-    
+
     try {
       const user = await loginService.login({
         username, password,
@@ -64,7 +64,7 @@ const App = () => {
       window.localStorage.setItem(
         'loggedBlogappUser', JSON.stringify(user)
       )
-      blogService.setToken(user.token) 
+      blogService.setToken(user.token)
       setUser(user)
       setUsername('')
       setPassword('')
@@ -112,7 +112,7 @@ const App = () => {
   const removeBlog = (id) => {
     blogService
       .deleteBlog(id)
-      .then(setBlogs(blogs.filter((blog) => blog.id != id)))
+      .then(setBlogs(blogs.filter((blog) => blog.id !== id)))
 
   }
 
@@ -122,26 +122,26 @@ const App = () => {
       <h2>Log in to application</h2>
       <Error message={errorMessage} />
       <form onSubmit={handleLogin}>
-      <div>
+        <div>
         username
           <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
+            type="text"
+            value={username}
+            name="Username"
+            onChange={({ target }) => setUsername(target.value)}
+          />
+        </div>
+        <div>
         password
           <input
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>      
+            type="password"
+            value={password}
+            name="Password"
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </div>
+        <button type="submit">login</button>
+      </form>
     </div>
   )
 
@@ -149,7 +149,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    )
   }, [])
 
   if (user === null) {
@@ -178,8 +178,8 @@ const App = () => {
       {blogs
         .sort((a,b) => a.likes - b.likes)
         .map(blog =>
-        <Blog key={blog.id} blog={blog} updateBlog={increaseLike} deleteBlog={removeBlog} userUsername={user.username}/>
-      )}
+          <Blog key={blog.id} blog={blog} updateBlog={increaseLike} deleteBlog={removeBlog} userUsername={user.username}/>
+        )}
     </div>
   )
 }
