@@ -65,6 +65,29 @@ describe('Blog app', function() {
         cy.contains('like').click()
         cy.contains('likes 1')
       })
+
+      it('A blog can be deleted by the user who created it', function() {
+        cy.contains('view').click()
+        cy.get('#remove-button').click()
+      })
+
+      it('A blog can only be deleted by the user who created it, not anyone else', function() {
+        const user2 = {
+          name: 'Sean Park',
+          username: 'seanpark',
+          password: 'sp123'
+        }
+        cy.request('POST', 'http://localhost:3003/api/users/', user2)
+
+        cy.get('#logout-button').click()
+        cy.get('#username').type('seanpark')
+        cy.get('#password').type('sp123')
+        cy.get('#login-button').click()
+
+        cy.contains('view').click()
+        cy.get('#remove-button')
+          .should('have.css', 'display', 'none')
+      })
     })
   })
 })

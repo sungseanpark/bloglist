@@ -168,7 +168,7 @@ const App = () => {
       <Notification message={notificationMessage} />
       <ul>
         {user.name} logged in
-        <button onClick={handleLogout}>
+        <button id= 'logout-button' onClick={handleLogout}>
           logout
         </button>
       </ul>

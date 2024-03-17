@@ -57,9 +57,7 @@ const Blog = ({ blog, updateBlog, deleteBlog, userUsername }) => {
         <div>
           {blogUser}
         </div>
-        <div style = {blogCreatedByUser}>
-          <button onClick={removeBlog}>remove</button>
-        </div>
+        <button style = {blogCreatedByUser} id='remove-button' onClick={removeBlog}>remove</button>
       </div>
     </div>
   )}
