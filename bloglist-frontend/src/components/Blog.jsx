@@ -43,7 +43,7 @@ const Blog = ({ blog, updateBlog, deleteBlog, userUsername }) => {
   }
 
   return (
-    <div style = {blogStyle}>
+    <div className = 'blog' style = {blogStyle}>
       <div>
         {blog.title} {blog.author} <button onClick={toggleVisibility}>{buttonLabel}</button>
       </div>
@@ -52,7 +52,7 @@ const Blog = ({ blog, updateBlog, deleteBlog, userUsername }) => {
           {blog.url}
         </div>
         <div>
-          likes {blog.likes} <button onClick={increaseLike}>like</button>
+          likes {blog.likes} <button id='like-button' onClick={increaseLike}>like</button>
         </div>
         <div>
           {blogUser}
