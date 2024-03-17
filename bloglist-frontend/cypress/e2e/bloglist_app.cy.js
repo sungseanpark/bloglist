@@ -33,4 +33,22 @@ describe('Blog app', function() {
       cy.get('.error').should('have.css', 'color', 'rgb(255, 0, 0)')
     })
   })
+
+  describe('When logged in', function() {
+    beforeEach(function() {
+      cy.get('#username').type('mluukkai')
+      cy.get('#password').type('salainen')
+      cy.get('#login-button').click()
+    })
+
+    it('A blog can be created', function() {
+      cy.contains('new blog').click()
+      cy.get('#title').type('Ab Hypertrophy Training Tips')
+      cy.get('#author').type('Mike Israetel')
+      cy.get('#url').type('https://rpstrength.com/blogs/articles/ab-hypertrophy-training-tips')
+      cy.get('#create-button').click()
+
+      cy.contains('Ab Hypertrophy Training Tips Mike Israetel')
+    })
+  })
 })
