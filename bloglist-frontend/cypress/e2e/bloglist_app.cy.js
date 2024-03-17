@@ -50,5 +50,21 @@ describe('Blog app', function() {
 
       cy.contains('Ab Hypertrophy Training Tips Mike Israetel')
     })
+
+    describe('After a blog has been created', function() {
+      beforeEach(function() {
+        cy.contains('new blog').click()
+        cy.get('#title').type('Ab Hypertrophy Training Tips')
+        cy.get('#author').type('Mike Israetel')
+        cy.get('#url').type('https://rpstrength.com/blogs/articles/ab-hypertrophy-training-tips')
+        cy.get('#create-button').click()
+      })
+
+      it('A blog can be liked', function() {
+        cy.contains('view').click()
+        cy.contains('like').click()
+        cy.contains('likes 1')
+      })
+    })
   })
 })
