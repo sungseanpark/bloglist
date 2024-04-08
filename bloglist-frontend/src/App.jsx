@@ -16,16 +16,16 @@ import { useNotificationDispatch } from './NotificationContext'
 //   return <div className="notification">{message}</div>;
 // };
 
-const Error = ({ message }) => {
-    if (message === null) {
-        return null
-    }
+// const Error = ({ message }) => {
+//     if (message === null) {
+//         return null
+//     }
 
-    return <div className="error">{message}</div>
-}
+//     return <div className="error">{message}</div>
+// }
 
 const App = () => {
-    const [blogs, setBlogs] = useState([])
+    // const [blogs, setBlogs] = useState([])
     // const [title, setTitle] = useState('')
     // const [author, setAuthor] = useState('')
     // const [url, setUrl] = useState('')
@@ -35,7 +35,35 @@ const App = () => {
     const [password, setPassword] = useState('')
     const [user, setUser] = useState(null)
 
+    const queryClient = useQueryClient()
+
+    const result = useQuery({
+      queryKey: ['blogs'],
+      queryFn: blogService.getAll,
+      retry: 1
+    })
+
     const dispatch = useNotificationDispatch()
+
+    const newBlogMutation = useMutation({
+      mutationFn: blogService.create, 
+      onSuccess: (newBlog) => {
+        const blogs = queryClient.getQueryData(['blogs'])
+        queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
+        const message = `A new blog '${newBlog.title}' by '${newBlog.author}' added`
+        dispatch({type: 'set', payload: message})
+        setTimeout(() => {
+          dispatch({type: 'clear'})
+        }, 5000)
+      },
+      // onError: () => {
+      //   const message = `Anecdote too short, must have 5 characters or more`
+      //   dispatch({type: 'set', payload: message})
+      //   setTimeout(() => {
+      //     dispatch({type: 'clear'})
+      //   }, 5000)
+      // }
+    })
 
     useEffect(() => {
         const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -82,21 +110,22 @@ const App = () => {
 
     const addBlog = (blogObject) => {
         blogFormRef.current.toggleVisibility()
-        blogService.create(blogObject).then((returnedBlog) => {
-            setBlogs(blogs.concat(returnedBlog))
-            // setNotificationMessage(
-            //     `A new blog '${returnedBlog.title}' by '${returnedBlog.author}' added`
-            // )
-            // setTimeout(() => {
-            //     setNotificationMessage(null)
-            // }, 5000)
+        newBlogMutation.mutate(blogObject)
+        // blogService.create(blogObject).then((returnedBlog) => {
+        //     setBlogs(blogs.concat(returnedBlog))
+        //     // setNotificationMessage(
+        //     //     `A new blog '${returnedBlog.title}' by '${returnedBlog.author}' added`
+        //     // )
+        //     // setTimeout(() => {
+        //     //     setNotificationMessage(null)
+        //     // }, 5000)
 
-            const message = `A new blog '${returnedBlog.title}' by '${returnedBlog.author}' added`
-            dispatch({ type: 'set', payload: message })
-            setTimeout(() => {
-                dispatch({ type: 'clear' })
-            }, 5000)
-        })
+        //     const message = `A new blog '${returnedBlog.title}' by '${returnedBlog.author}' added`
+        //     dispatch({ type: 'set', payload: message })
+        //     setTimeout(() => {
+        //         dispatch({ type: 'clear' })
+        //     }, 5000)
+        // })
     }
 
     const increaseLike = (id, blogObject) => {
@@ -147,12 +176,22 @@ const App = () => {
         </div>
     )
 
-    useEffect(() => {
-        blogService.getAll().then((blogs) => setBlogs(blogs))
-    }, [])
+    // useEffect(() => {
+    //     blogService.getAll().then((blogs) => setBlogs(blogs))
+    // }, [])
+
+    const blogs = result.data
 
     if (user === null) {
         return <div>{loginForm()}</div>
+    }
+
+    if ( result.isLoading ) {
+      return <div>loading data...</div>
+    }
+  
+    if ( result.isError ) {
+      return <div>blog service is not available due to problems in server</div>
     }
 
     return (
