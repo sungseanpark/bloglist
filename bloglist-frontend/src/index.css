@@ -2,6 +2,10 @@ ul {
   padding-inline-start: 0px;
 }
 
+li {
+  list-style-type: circle;
+}
+
 .error {
   color: red;
   background: lightgrey;

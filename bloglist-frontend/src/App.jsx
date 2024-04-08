@@ -9,7 +9,7 @@ import userService from './services/users'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotificationDispatch } from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom'
 
 // const Notification = ({ message }) => {
 //   if (message === null) {
@@ -61,6 +61,30 @@ const Home = (props) => (
     </div>
 )
 
+const User = ({ users }) => {
+  const id = useParams().id
+  const user = users.find(n=> n.id === id)
+  console.log(user)
+
+  if (!user) {
+    return null
+  }
+
+  return (
+    <div>
+      <h2>{user.name}</h2>
+      <h3>added blogs</h3>
+      <ol>
+        {user.blogs.map(blog => 
+          <li key={blog.id} >
+            {blog.title}
+          </li>)}
+      </ol>
+      <br />
+    </div>
+  )
+}
+
 const Users = ({ users }) => (
   <div>
     <h2>Users</h2>
@@ -74,7 +98,7 @@ const Users = ({ users }) => (
       <tbody>
         {users.map((user, index) => (
           <tr key={index}>
-            <td>{user.name}</td>
+            <td><Link to={`/users/${user.id}`}>{user.name}</Link></td>
             <td>{user.blogs.length}</td>
           </tr>
         ))}
@@ -191,42 +215,13 @@ const App = () => {
     const addBlog = (blogObject) => {
         blogFormRef.current.toggleVisibility()
         newBlogMutation.mutate(blogObject)
-        // blogService.create(blogObject).then((returnedBlog) => {
-        //     setBlogs(blogs.concat(returnedBlog))
-        //     // setNotificationMessage(
-        //     //     `A new blog '${returnedBlog.title}' by '${returnedBlog.author}' added`
-        //     // )
-        //     // setTimeout(() => {
-        //     //     setNotificationMessage(null)
-        //     // }, 5000)
-
-        //     const message = `A new blog '${returnedBlog.title}' by '${returnedBlog.author}' added`
-        //     dispatch({ type: 'set', payload: message })
-        //     setTimeout(() => {
-        //         dispatch({ type: 'clear' })
-        //     }, 5000)
-        // })
     }
 
     const increaseLike = (blogObject) => {
-        // blogService.update(id, blogObject).then((returnedBlog) => {
-        //     setBlogs(
-        //         blogs.map((blog) => (blog.id !== id ? blog : returnedBlog))
-        //     )
-        //     //console.log(returnedBlog.user)
-        // })
-
-        // blogService.update(blogObject)
-
-        // console.log(blogObject)
         updateBlogMutation.mutate(blogObject)
-        //console.log(user)
     }
 
     const removeBlog = (id) => {
-        // blogService
-        //     .deleteBlog(id)
-        //     .then(setBlogs(blogs.filter((blog) => blog.id !== id)))
         deleteBlogMutation.mutate(id)
     }
 
@@ -262,9 +257,6 @@ const App = () => {
         </div>
     )
 
-    // useEffect(() => {
-    //     blogService.getAll().then((blogs) => setBlogs(blogs))
-    // }, [])
 
     const blogs = result.data
 
@@ -299,6 +291,7 @@ const App = () => {
 
                 <Routes>
                   <Route path="/users" element={<Users users={users}/>}/>
+                  <Route path="/users/:id" element={<User users={users} />} />
                     <Route
                         path="/"
                         element={
