@@ -162,6 +162,13 @@ const App = () => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     // const [user, setUser] = useState(null)
+
+    const inlineBlock = {
+      display: "inline-block",
+      marginRight: "10px", // Adjust the spacing between links as needed
+    }
+    
+
     const user = useUserValue()
 
     const queryClient = useQueryClient()
@@ -323,7 +330,19 @@ const App = () => {
 
     return (
         <Router>
-            <div>
+          <div>
+          <Link style={inlineBlock} to="/">blogs</Link>
+          <Link style={inlineBlock} to="/users">users </Link>
+          <ul style={inlineBlock}>
+                    {user.name} logged in
+                    <button id="logout-button" onClick={handleLogout}>
+                        logout
+                    </button>
+                </ul>
+          </div>
+          <h1>blog app</h1>
+          <Notification />
+            {/* <div>
                 <h2>blogs</h2>
                 <Notification />
                 <ul>
@@ -332,7 +351,7 @@ const App = () => {
                     <button id="logout-button" onClick={handleLogout}>
                         logout
                     </button>
-                </ul>
+                </ul> */}
 
                 <Routes>
                     <Route path="/users" element={<Users users={users} />} />
@@ -374,7 +393,7 @@ const App = () => {
                         userUsername={user.username}
                     />
                 ))} */}
-            </div>
+            {/* </div> */}
         </Router>
     )
 }
