@@ -6,10 +6,16 @@ import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import userService from './services/users'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, notifyManager } from '@tanstack/react-query'
 import { useNotificationDispatch } from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
-import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom'
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Link,
+    useParams,
+} from 'react-router-dom'
 
 // const Notification = ({ message }) => {
 //   if (message === null) {
@@ -42,6 +48,15 @@ const BlogList = ({ blogs }) => (
     </div>
 )
 
+const blogStyle = {
+  paddingTop: 10,
+  paddingLeft: 2,
+  border: "solid",
+  borderWidth: 1,
+  marginBottom: 5,
+  listStyleType: 'none'
+}
+
 const Home = (props) => (
     <div>
         <Togglable buttonLabel="new blog" ref={props.blogFormRef}>
@@ -50,61 +65,92 @@ const Home = (props) => (
         {props.blogs
             .sort((a, b) => b.likes - a.likes)
             .map((blog) => (
-                <Blog
-                    key={blog.id}
-                    blog={blog}
-                    updateBlog={props.increaseLike}
-                    deleteBlog={props.removeBlog}
-                    userUsername={props.username}
-                />
+                <li style ={blogStyle} key={blog.id}>
+                    <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+                </li>
             ))}
     </div>
 )
 
 const User = ({ users }) => {
-  const id = useParams().id
-  const user = users.find(n=> n.id === id)
-  console.log(user)
+    const id = useParams().id
+    const user = users.find((n) => n.id === id)
+    console.log(user)
 
-  if (!user) {
-    return null
-  }
+    if (!user) {
+        return null
+    }
 
-  return (
-    <div>
-      <h2>{user.name}</h2>
-      <h3>added blogs</h3>
-      <ol>
-        {user.blogs.map(blog => 
-          <li key={blog.id} >
-            {blog.title}
-          </li>)}
-      </ol>
-      <br />
-    </div>
-  )
+    return (
+        <div>
+            <h2>{user.name}</h2>
+            <h3>added blogs</h3>
+            <ol>
+                {user.blogs.map((blog) => (
+                    <li key={blog.id}>{blog.title}</li>
+                ))}
+            </ol>
+            <br />
+        </div>
+    )
+}
+
+const BlogPage = ({ blogs, increaseLike }) => {
+    const id = useParams().id
+    const blog = blogs.find((n) => n.id === id)
+
+    const handleLike = (event) => {
+        event.preventDefault()
+        increaseLike({
+            user: blog.user.id,
+            likes: blog.likes + 1,
+            author: blog.author,
+            title: blog.title,
+            url: blog.url,
+            id: blog.id,
+        })
+    }
+
+    if (!blog) {
+        return null
+    }
+
+    return (
+        <div>
+            <h2>{blog.title}</h2>
+            <a href={blog.url}>{blog.url}</a>
+            <div>
+                {blog.likes}likes <button onClick={handleLike}>like</button>
+            </div>
+            <div>added by {blog.user.name}</div>
+        </div>
+    )
 }
 
 const Users = ({ users }) => (
-  <div>
-    <h2>Users</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th><strong>Blogs created</strong></th>
-        </tr>
-      </thead>
-      <tbody>
-        {users.map((user, index) => (
-          <tr key={index}>
-            <td><Link to={`/users/${user.id}`}>{user.name}</Link></td>
-            <td>{user.blogs.length}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+    <div>
+        <h2>Users</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>
+                        <strong>Blogs created</strong>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {users.map((user, index) => (
+                    <tr key={index}>
+                        <td>
+                            <Link to={`/users/${user.id}`}>{user.name}</Link>
+                        </td>
+                        <td>{user.blogs.length}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
 )
 const App = () => {
     // const [blogs, setBlogs] = useState([])
@@ -127,10 +173,10 @@ const App = () => {
     })
 
     const usersResult = useQuery({
-      queryKey: ['users'],
-      queryFn: userService.getAll,
-      retry: 1,
-  })
+        queryKey: ['users'],
+        queryFn: userService.getAll,
+        retry: 1,
+    })
 
     const dispatch = useNotificationDispatch()
     const userDispatch = useUserDispatch()
@@ -257,7 +303,6 @@ const App = () => {
         </div>
     )
 
-
     const blogs = result.data
 
     const users = usersResult.data
@@ -290,8 +335,17 @@ const App = () => {
                 </ul>
 
                 <Routes>
-                  <Route path="/users" element={<Users users={users}/>}/>
-                  <Route path="/users/:id" element={<User users={users} />} />
+                    <Route path="/users" element={<Users users={users} />} />
+                    <Route path="/users/:id" element={<User users={users} />} />
+                    <Route
+                        path="/blogs/:id"
+                        element={
+                            <BlogPage
+                                blogs={blogs}
+                                increaseLike={increaseLike}
+                            />
+                        }
+                    />
                     <Route
                         path="/"
                         element={
