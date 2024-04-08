@@ -29,8 +29,8 @@ const App = () => {
     // const [title, setTitle] = useState('')
     // const [author, setAuthor] = useState('')
     // const [url, setUrl] = useState('')
-    const [notificationMessage, setNotificationMessage] = useState(null)
-    const [errorMessage, setErrorMessage] = useState(null)
+    // const [notificationMessage, setNotificationMessage] = useState(null)
+    // const [errorMessage, setErrorMessage] = useState(null)
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [user, setUser] = useState(null)
@@ -63,6 +63,20 @@ const App = () => {
       //     dispatch({type: 'clear'})
       //   }, 5000)
       // }
+    })
+
+    const updateBlogMutation = useMutation({
+      mutationFn: blogService.update,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['blogs'] })
+      },
+    })
+
+    const deleteBlogMutation = useMutation({
+      mutationFn: blogService.deleteBlog,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['blogs']})
+      },
     })
 
     useEffect(() => {
@@ -128,20 +142,26 @@ const App = () => {
         // })
     }
 
-    const increaseLike = (id, blogObject) => {
-        blogService.update(id, blogObject).then((returnedBlog) => {
-            setBlogs(
-                blogs.map((blog) => (blog.id !== id ? blog : returnedBlog))
-            )
-            //console.log(returnedBlog.user)
-        })
+    const increaseLike = (blogObject) => {
+        // blogService.update(id, blogObject).then((returnedBlog) => {
+        //     setBlogs(
+        //         blogs.map((blog) => (blog.id !== id ? blog : returnedBlog))
+        //     )
+        //     //console.log(returnedBlog.user)
+        // })
+
+        // blogService.update(blogObject)
+
+        // console.log(blogObject)
+        updateBlogMutation.mutate(blogObject)
         //console.log(user)
     }
 
     const removeBlog = (id) => {
-        blogService
-            .deleteBlog(id)
-            .then(setBlogs(blogs.filter((blog) => blog.id !== id)))
+        // blogService
+        //     .deleteBlog(id)
+        //     .then(setBlogs(blogs.filter((blog) => blog.id !== id)))
+        deleteBlogMutation.mutate(id)
     }
 
     const loginForm = () => (

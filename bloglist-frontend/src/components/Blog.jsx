@@ -19,12 +19,13 @@ const Blog = ({ blog, updateBlog, deleteBlog, userUsername }) => {
 
   const increaseLike = (event) => {
     event.preventDefault();
-    updateBlog(blog.id, {
+    updateBlog({
       user: blog.user.id,
       likes: blog.likes + 1,
       author: blog.author,
       title: blog.title,
       url: blog.url,
+      id: blog.id
     });
   };
 
