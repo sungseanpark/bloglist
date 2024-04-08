@@ -5,9 +5,11 @@ import Togglable from './components/Togglable'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import userService from './services/users'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotificationDispatch } from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
 // const Notification = ({ message }) => {
 //   if (message === null) {
@@ -25,6 +27,61 @@ import { useUserDispatch, useUserValue } from './UserContext'
 //     return <div className="error">{message}</div>
 // }
 
+const BlogList = ({ blogs }) => (
+    <div>
+        <h2>Anecdotes</h2>
+        <ul>
+            {anecdotes.map((anecdote) => (
+                <li key={anecdote.id}>
+                    <Link to={`/anecdotes/${anecdote.id}`}>
+                        {anecdote.content}
+                    </Link>
+                </li>
+            ))}
+        </ul>
+    </div>
+)
+
+const Home = (props) => (
+    <div>
+        <Togglable buttonLabel="new blog" ref={props.blogFormRef}>
+            <BlogForm createBlog={props.addBlog} />
+        </Togglable>
+        {props.blogs
+            .sort((a, b) => b.likes - a.likes)
+            .map((blog) => (
+                <Blog
+                    key={blog.id}
+                    blog={blog}
+                    updateBlog={props.increaseLike}
+                    deleteBlog={props.removeBlog}
+                    userUsername={props.username}
+                />
+            ))}
+    </div>
+)
+
+const Users = ({ users }) => (
+  <div>
+    <h2>Users</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th><strong>Blogs created</strong></th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.map((user, index) => (
+          <tr key={index}>
+            <td>{user.name}</td>
+            <td>{user.blogs.length}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)
 const App = () => {
     // const [blogs, setBlogs] = useState([])
     // const [title, setTitle] = useState('')
@@ -44,6 +101,12 @@ const App = () => {
         queryFn: blogService.getAll,
         retry: 1,
     })
+
+    const usersResult = useQuery({
+      queryKey: ['users'],
+      queryFn: userService.getAll,
+      retry: 1,
+  })
 
     const dispatch = useNotificationDispatch()
     const userDispatch = useUserDispatch()
@@ -205,6 +268,8 @@ const App = () => {
 
     const blogs = result.data
 
+    const users = usersResult.data
+
     if (user === null) {
         return <div>{loginForm()}</div>
     }
@@ -220,16 +285,35 @@ const App = () => {
     }
 
     return (
-        <div>
-            <h2>blogs</h2>
-            <Notification />
-            <ul>
-                {user.name} logged in
-                <button id="logout-button" onClick={handleLogout}>
-                    logout
-                </button>
-            </ul>
-            <Togglable buttonLabel="new blog" ref={blogFormRef}>
+        <Router>
+            <div>
+                <h2>blogs</h2>
+                <Notification />
+                <ul>
+                    {user.name} logged in
+                    <br></br>
+                    <button id="logout-button" onClick={handleLogout}>
+                        logout
+                    </button>
+                </ul>
+
+                <Routes>
+                  <Route path="/users" element={<Users users={users}/>}/>
+                    <Route
+                        path="/"
+                        element={
+                            <Home
+                                blogFormRef={blogFormRef}
+                                addBlog={addBlog}
+                                blogs={blogs}
+                                increaseLike={increaseLike}
+                                removeBlog={removeBlog}
+                                username={user.username}
+                            />
+                        }
+                    />
+                </Routes>
+                {/* <Togglable buttonLabel="new blog" ref={blogFormRef}>
                 <BlogForm createBlog={addBlog} />
             </Togglable>
             {blogs
@@ -242,8 +326,9 @@ const App = () => {
                         deleteBlog={removeBlog}
                         userUsername={user.username}
                     />
-                ))}
-        </div>
+                ))} */}
+            </div>
+        </Router>
     )
 }
 
