@@ -7,6 +7,7 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotificationDispatch } from './NotificationContext'
+import { useUserDispatch, useUserValue } from './UserContext'
 
 // const Notification = ({ message }) => {
 //   if (message === null) {
@@ -33,57 +34,59 @@ const App = () => {
     // const [errorMessage, setErrorMessage] = useState(null)
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const [user, setUser] = useState(null)
+    // const [user, setUser] = useState(null)
+    const user = useUserValue()
 
     const queryClient = useQueryClient()
 
     const result = useQuery({
-      queryKey: ['blogs'],
-      queryFn: blogService.getAll,
-      retry: 1
+        queryKey: ['blogs'],
+        queryFn: blogService.getAll,
+        retry: 1,
     })
 
     const dispatch = useNotificationDispatch()
+    const userDispatch = useUserDispatch()
 
     const newBlogMutation = useMutation({
-      mutationFn: blogService.create, 
-      onSuccess: (newBlog) => {
-        const blogs = queryClient.getQueryData(['blogs'])
-        queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
-        const message = `A new blog '${newBlog.title}' by '${newBlog.author}' added`
-        dispatch({type: 'set', payload: message})
-        setTimeout(() => {
-          dispatch({type: 'clear'})
-        }, 5000)
-      },
-      // onError: () => {
-      //   const message = `Anecdote too short, must have 5 characters or more`
-      //   dispatch({type: 'set', payload: message})
-      //   setTimeout(() => {
-      //     dispatch({type: 'clear'})
-      //   }, 5000)
-      // }
+        mutationFn: blogService.create,
+        onSuccess: (newBlog) => {
+            const blogs = queryClient.getQueryData(['blogs'])
+            queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
+            const message = `A new blog '${newBlog.title}' by '${newBlog.author}' added`
+            dispatch({ type: 'set', payload: message })
+            setTimeout(() => {
+                dispatch({ type: 'clear' })
+            }, 5000)
+        },
+        // onError: () => {
+        //   const message = `Anecdote too short, must have 5 characters or more`
+        //   dispatch({type: 'set', payload: message})
+        //   setTimeout(() => {
+        //     dispatch({type: 'clear'})
+        //   }, 5000)
+        // }
     })
 
     const updateBlogMutation = useMutation({
-      mutationFn: blogService.update,
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['blogs'] })
-      },
+        mutationFn: blogService.update,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['blogs'] })
+        },
     })
 
     const deleteBlogMutation = useMutation({
-      mutationFn: blogService.deleteBlog,
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['blogs']})
-      },
+        mutationFn: blogService.deleteBlog,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['blogs'] })
+        },
     })
 
     useEffect(() => {
         const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
         if (loggedUserJSON) {
             const user = JSON.parse(loggedUserJSON)
-            setUser(user)
+            userDispatch({ type: 'set', payload: user })
             blogService.setToken(user.token)
         }
     }, [])
@@ -103,7 +106,7 @@ const App = () => {
                 JSON.stringify(user)
             )
             blogService.setToken(user.token)
-            setUser(user)
+            userDispatch({ type: 'set', payload: user })
             setUsername('')
             setPassword('')
         } catch (exception) {
@@ -119,7 +122,7 @@ const App = () => {
         event.preventDefault()
 
         window.localStorage.removeItem('loggedBlogappUser')
-        setUser(null)
+        userDispatch({ type: 'clear' })
     }
 
     const addBlog = (blogObject) => {
@@ -206,12 +209,14 @@ const App = () => {
         return <div>{loginForm()}</div>
     }
 
-    if ( result.isLoading ) {
-      return <div>loading data...</div>
+    if (result.isLoading) {
+        return <div>loading data...</div>
     }
-  
-    if ( result.isError ) {
-      return <div>blog service is not available due to problems in server</div>
+
+    if (result.isError) {
+        return (
+            <div>blog service is not available due to problems in server</div>
+        )
     }
 
     return (
