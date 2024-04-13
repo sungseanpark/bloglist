@@ -71,4 +71,29 @@ router.put('/:id', async (request, response) => {
   response.json(updatedBlog)
 })
 
+router.post('/:id/comments', userExtractor, async (request, response) => {
+  try {
+    const blogId = request.params.id;
+    const comment = request.body.comment;
+
+    // Find the blog post by ID
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return response.status(404).json({ error: 'Blog not found' });
+    }
+
+    // Add the comment to the comments array of the blog
+    blog.comments.push(comment);
+
+    // Save the updated blog
+    const updatedBlog = await blog.save();
+
+    response.status(201).json(updatedBlog);
+  } catch (error) {
+    response.status(500).json({ error: 'Internal Server Error' });
+  }
+
+})
+
 module.exports = router

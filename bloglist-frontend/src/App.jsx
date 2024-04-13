@@ -21,6 +21,7 @@ import {
     Link,
     useParams,
 } from 'react-router-dom'
+import { Table, Form, Button } from 'react-bootstrap'
 
 // const Notification = ({ message }) => {
 //   if (message === null) {
@@ -67,13 +68,28 @@ const Home = (props) => (
         <Togglable buttonLabel="new blog" ref={props.blogFormRef}>
             <BlogForm createBlog={props.addBlog} />
         </Togglable>
-        {props.blogs
+        {/* {props.blogs
             .sort((a, b) => b.likes - a.likes)
             .map((blog) => (
                 <li style={blogStyle} key={blog.id}>
                     <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
                 </li>
-            ))}
+            ))} */}
+        <Table striped>
+            <tbody>
+                {props.blogs
+                    .sort((a, b) => b.likes - a.likes)
+                    .map((blog) => (
+                        <tr key={blog.id}>
+                            <td>
+                                <Link to={`/blogs/${blog.id}`}>
+                                    {blog.title}
+                                </Link>
+                            </td>
+                        </tr>
+                    ))}
+            </tbody>
+        </Table>
     </div>
 )
 
@@ -320,7 +336,7 @@ const App = () => {
         <div>
             <h2>Log in to application</h2>
             <Notification />
-            <form onSubmit={handleLogin}>
+            {/* <form onSubmit={handleLogin}>
                 <div>
                     username
                     <input
@@ -344,7 +360,28 @@ const App = () => {
                 <button id="login-button" type="submit">
                     login
                 </button>
-            </form>
+            </form> */}
+            <Form onSubmit={handleLogin}>
+                <Form.Group>
+                    <Form.Label>username:</Form.Label>
+                    <Form.Control id="username"
+                        type="text"
+                        value={username}
+                        name="Username"
+                        onChange={({ target }) => setUsername(target.value)} />
+                </Form.Group>
+                <Form.Group>
+                    <Form.Label>password:</Form.Label>
+                    <Form.Control id="password"
+                        type="password"
+                        value={password}
+                        name="Password"
+                        onChange={({ target }) => setPassword(target.value)} />
+                </Form.Group>
+                <Button variant="primary" type="submit">
+                    login
+                </Button>
+            </Form>
         </div>
     )
 
@@ -353,7 +390,7 @@ const App = () => {
     const users = usersResult.data
 
     if (user === null) {
-        return <div>{loginForm()}</div>
+        return <div className="container">{loginForm()}</div>
     }
 
     if (result.isLoading) {
@@ -367,24 +404,25 @@ const App = () => {
     }
 
     return (
-        <Router>
-            <div>
-                <Link style={inlineBlock} to="/">
-                    blogs
-                </Link>
-                <Link style={inlineBlock} to="/users">
-                    users{' '}
-                </Link>
-                <ul style={inlineBlock}>
-                    {user.name} logged in
-                    <button id="logout-button" onClick={handleLogout}>
-                        logout
-                    </button>
-                </ul>
-            </div>
-            <h1>blog app</h1>
-            <Notification />
-            {/* <div>
+        <div className="container">
+            <Router>
+                <div>
+                    <Link style={inlineBlock} to="/">
+                        blogs
+                    </Link>
+                    <Link style={inlineBlock} to="/users">
+                        users{' '}
+                    </Link>
+                    <ul style={inlineBlock}>
+                        {user.name} logged in
+                        <button id="logout-button" onClick={handleLogout}>
+                            logout
+                        </button>
+                    </ul>
+                </div>
+                <h1>blog app</h1>
+                <Notification />
+                {/* <div>
                 <h2>blogs</h2>
                 <Notification />
                 <ul>
@@ -395,34 +433,34 @@ const App = () => {
                     </button>
                 </ul> */}
 
-            <Routes>
-                <Route path="/users" element={<Users users={users} />} />
-                <Route path="/users/:id" element={<User users={users} />} />
-                <Route
-                    path="/blogs/:id"
-                    element={
-                        <BlogPage
-                            blogs={blogs}
-                            increaseLike={increaseLike}
-                            addComment={addComment}
-                        />
-                    }
-                />
-                <Route
-                    path="/"
-                    element={
-                        <Home
-                            blogFormRef={blogFormRef}
-                            addBlog={addBlog}
-                            blogs={blogs}
-                            increaseLike={increaseLike}
-                            removeBlog={removeBlog}
-                            username={user.username}
-                        />
-                    }
-                />
-            </Routes>
-            {/* <Togglable buttonLabel="new blog" ref={blogFormRef}>
+                <Routes>
+                    <Route path="/users" element={<Users users={users} />} />
+                    <Route path="/users/:id" element={<User users={users} />} />
+                    <Route
+                        path="/blogs/:id"
+                        element={
+                            <BlogPage
+                                blogs={blogs}
+                                increaseLike={increaseLike}
+                                addComment={addComment}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/"
+                        element={
+                            <Home
+                                blogFormRef={blogFormRef}
+                                addBlog={addBlog}
+                                blogs={blogs}
+                                increaseLike={increaseLike}
+                                removeBlog={removeBlog}
+                                username={user.username}
+                            />
+                        }
+                    />
+                </Routes>
+                {/* <Togglable buttonLabel="new blog" ref={blogFormRef}>
                 <BlogForm createBlog={addBlog} />
             </Togglable>
             {blogs
@@ -436,8 +474,9 @@ const App = () => {
                         userUsername={user.username}
                     />
                 ))} */}
-            {/* </div> */}
-        </Router>
+                {/* </div> */}
+            </Router>
+        </div>
     )
 }
 

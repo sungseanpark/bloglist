@@ -8,7 +8,10 @@ const schema = mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
-  }
+  },
+  comments: [{ 
+    type: String // Array of comments added by users
+  }]
 })
 
 
