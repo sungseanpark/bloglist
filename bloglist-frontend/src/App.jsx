@@ -6,7 +6,12 @@ import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import userService from './services/users'
-import { useQuery, useMutation, useQueryClient, notifyManager } from '@tanstack/react-query'
+import {
+    useQuery,
+    useMutation,
+    useQueryClient,
+    notifyManager,
+} from '@tanstack/react-query'
 import { useNotificationDispatch } from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
 import {
@@ -49,12 +54,12 @@ const BlogList = ({ blogs }) => (
 )
 
 const blogStyle = {
-  paddingTop: 10,
-  paddingLeft: 2,
-  border: "solid",
-  borderWidth: 1,
-  marginBottom: 5,
-  listStyleType: 'none'
+    paddingTop: 10,
+    paddingLeft: 2,
+    border: 'solid',
+    borderWidth: 1,
+    marginBottom: 5,
+    listStyleType: 'none',
 }
 
 const Home = (props) => (
@@ -65,7 +70,7 @@ const Home = (props) => (
         {props.blogs
             .sort((a, b) => b.likes - a.likes)
             .map((blog) => (
-                <li style ={blogStyle} key={blog.id}>
+                <li style={blogStyle} key={blog.id}>
                     <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
                 </li>
             ))}
@@ -95,9 +100,10 @@ const User = ({ users }) => {
     )
 }
 
-const BlogPage = ({ blogs, increaseLike }) => {
+const BlogPage = ({ blogs, increaseLike, addComment }) => {
     const id = useParams().id
     const blog = blogs.find((n) => n.id === id)
+    const [comment, setComment] = useState('')
 
     const handleLike = (event) => {
         event.preventDefault()
@@ -109,6 +115,15 @@ const BlogPage = ({ blogs, increaseLike }) => {
             url: blog.url,
             id: blog.id,
         })
+    }
+
+    const handleComment = (event) => {
+        event.preventDefault()
+        addComment({
+            id: blog.id,
+            comment: comment,
+        })
+        setComment('')
     }
 
     if (!blog) {
@@ -123,6 +138,19 @@ const BlogPage = ({ blogs, increaseLike }) => {
                 {blog.likes}likes <button onClick={handleLike}>like</button>
             </div>
             <div>added by {blog.user.name}</div>
+            <h3>comments</h3>
+            <label>
+                <input
+                    value={comment}
+                    onChange={({ target }) => setComment(target.value)}
+                />
+                <button onClick={handleComment}>add comment</button>
+            </label>
+            <ol>
+                {blog.comments.map((comment) => (
+                    <li key={comment.id}>{comment}</li>
+                ))}
+            </ol>
         </div>
     )
 }
@@ -164,10 +192,9 @@ const App = () => {
     // const [user, setUser] = useState(null)
 
     const inlineBlock = {
-      display: "inline-block",
-      marginRight: "10px", // Adjust the spacing between links as needed
+        display: 'inline-block',
+        marginRight: '10px', // Adjust the spacing between links as needed
     }
-    
 
     const user = useUserValue()
 
@@ -217,6 +244,13 @@ const App = () => {
 
     const deleteBlogMutation = useMutation({
         mutationFn: blogService.deleteBlog,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['blogs'] })
+        },
+    })
+
+    const newCommentMutation = useMutation({
+        mutationFn: blogService.postComment,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['blogs'] })
         },
@@ -278,6 +312,10 @@ const App = () => {
         deleteBlogMutation.mutate(id)
     }
 
+    const addComment = (commentObject) => {
+        newCommentMutation.mutate(commentObject)
+    }
+
     const loginForm = () => (
         <div>
             <h2>Log in to application</h2>
@@ -330,18 +368,22 @@ const App = () => {
 
     return (
         <Router>
-          <div>
-          <Link style={inlineBlock} to="/">blogs</Link>
-          <Link style={inlineBlock} to="/users">users </Link>
-          <ul style={inlineBlock}>
+            <div>
+                <Link style={inlineBlock} to="/">
+                    blogs
+                </Link>
+                <Link style={inlineBlock} to="/users">
+                    users{' '}
+                </Link>
+                <ul style={inlineBlock}>
                     {user.name} logged in
                     <button id="logout-button" onClick={handleLogout}>
                         logout
                     </button>
                 </ul>
-          </div>
-          <h1>blog app</h1>
-          <Notification />
+            </div>
+            <h1>blog app</h1>
+            <Notification />
             {/* <div>
                 <h2>blogs</h2>
                 <Notification />
@@ -353,33 +395,34 @@ const App = () => {
                     </button>
                 </ul> */}
 
-                <Routes>
-                    <Route path="/users" element={<Users users={users} />} />
-                    <Route path="/users/:id" element={<User users={users} />} />
-                    <Route
-                        path="/blogs/:id"
-                        element={
-                            <BlogPage
-                                blogs={blogs}
-                                increaseLike={increaseLike}
-                            />
-                        }
-                    />
-                    <Route
-                        path="/"
-                        element={
-                            <Home
-                                blogFormRef={blogFormRef}
-                                addBlog={addBlog}
-                                blogs={blogs}
-                                increaseLike={increaseLike}
-                                removeBlog={removeBlog}
-                                username={user.username}
-                            />
-                        }
-                    />
-                </Routes>
-                {/* <Togglable buttonLabel="new blog" ref={blogFormRef}>
+            <Routes>
+                <Route path="/users" element={<Users users={users} />} />
+                <Route path="/users/:id" element={<User users={users} />} />
+                <Route
+                    path="/blogs/:id"
+                    element={
+                        <BlogPage
+                            blogs={blogs}
+                            increaseLike={increaseLike}
+                            addComment={addComment}
+                        />
+                    }
+                />
+                <Route
+                    path="/"
+                    element={
+                        <Home
+                            blogFormRef={blogFormRef}
+                            addBlog={addBlog}
+                            blogs={blogs}
+                            increaseLike={increaseLike}
+                            removeBlog={removeBlog}
+                            username={user.username}
+                        />
+                    }
+                />
+            </Routes>
+            {/* <Togglable buttonLabel="new blog" ref={blogFormRef}>
                 <BlogForm createBlog={addBlog} />
             </Togglable>
             {blogs
