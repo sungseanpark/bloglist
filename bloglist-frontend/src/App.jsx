@@ -21,7 +21,7 @@ import {
     Link,
     useParams,
 } from 'react-router-dom'
-import { Table, Form, Button } from 'react-bootstrap'
+import { Table, Form, Button, Navbar, Nav } from 'react-bootstrap'
 
 // const Notification = ({ message }) => {
 //   if (message === null) {
@@ -39,20 +39,20 @@ import { Table, Form, Button } from 'react-bootstrap'
 //     return <div className="error">{message}</div>
 // }
 
-const BlogList = ({ blogs }) => (
-    <div>
-        <h2>Anecdotes</h2>
-        <ul>
-            {anecdotes.map((anecdote) => (
-                <li key={anecdote.id}>
-                    <Link to={`/anecdotes/${anecdote.id}`}>
-                        {anecdote.content}
-                    </Link>
-                </li>
-            ))}
-        </ul>
-    </div>
-)
+// const BlogList = ({ blogs }) => (
+//     <div>
+//         <h2>Anecdotes</h2>
+//         <ul>
+//             {anecdotes.map((anecdote) => (
+//                 <li key={anecdote.id}>
+//                     <Link to={`/anecdotes/${anecdote.id}`}>
+//                         {anecdote.content}
+//                     </Link>
+//                 </li>
+//             ))}
+//         </ul>
+//     </div>
+// )
 
 const blogStyle = {
     paddingTop: 10,
@@ -206,6 +206,9 @@ const App = () => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     // const [user, setUser] = useState(null)
+    const padding = {
+        padding: 5,
+    }
 
     const inlineBlock = {
         display: 'inline-block',
@@ -297,6 +300,11 @@ const App = () => {
             )
             blogService.setToken(user.token)
             userDispatch({ type: 'set', payload: user })
+            const message = `welcome ${username}`
+            dispatch({ type: 'set', payload: message })
+            setTimeout(() => {
+                dispatch({ type: 'clear' })
+            }, 5000)
             setUsername('')
             setPassword('')
         } catch (exception) {
@@ -364,19 +372,23 @@ const App = () => {
             <Form onSubmit={handleLogin}>
                 <Form.Group>
                     <Form.Label>username:</Form.Label>
-                    <Form.Control id="username"
+                    <Form.Control
+                        id="username"
                         type="text"
                         value={username}
                         name="Username"
-                        onChange={({ target }) => setUsername(target.value)} />
+                        onChange={({ target }) => setUsername(target.value)}
+                    />
                 </Form.Group>
                 <Form.Group>
                     <Form.Label>password:</Form.Label>
-                    <Form.Control id="password"
+                    <Form.Control
+                        id="password"
                         type="password"
                         value={password}
                         name="Password"
-                        onChange={({ target }) => setPassword(target.value)} />
+                        onChange={({ target }) => setPassword(target.value)}
+                    />
                 </Form.Group>
                 <Button variant="primary" type="submit">
                     login
@@ -406,20 +418,42 @@ const App = () => {
     return (
         <div className="container">
             <Router>
-                <div>
-                    <Link style={inlineBlock} to="/">
-                        blogs
-                    </Link>
-                    <Link style={inlineBlock} to="/users">
-                        users{' '}
-                    </Link>
-                    <ul style={inlineBlock}>
-                        {user.name} logged in
-                        <button id="logout-button" onClick={handleLogout}>
-                            logout
-                        </button>
-                    </ul>
-                </div>
+                <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+                    <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+                    <Navbar.Collapse id="responsive-navbar-nav">
+                        <Nav className="me-auto">
+                            <Nav.Link href="#" as="span">
+                                <Link style={padding} to="/">
+                                    blogs
+                                </Link>
+                            </Nav.Link>
+                            <Nav.Link href="#" as="span">
+                                <Link style={padding} to="/users">
+                                    users
+                                </Link>
+                            </Nav.Link>
+                            <Nav.Link href="#" as="span">
+                                {user ? (
+                                    <ul style={inlineBlock}>
+                                        <em style={padding}>
+                                            {user.username} logged in
+                                        </em>
+                                        <button
+                                            id="logout-button"
+                                            onClick={handleLogout}
+                                        >
+                                            logout
+                                        </button>
+                                    </ul>
+                                ) : (
+                                    <Link style={padding} to="/login">
+                                        login
+                                    </Link>
+                                )}
+                            </Nav.Link>
+                        </Nav>
+                    </Navbar.Collapse>
+                </Navbar>
                 <h1>blog app</h1>
                 <Notification />
                 {/* <div>
